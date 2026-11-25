@@ -1,410 +1,264 @@
-# 🍷 Analyse des ventes et des stocks d'un e-commerce de vins avec Python
 
-## 📌 Présentation
+# Bottleneck — E-commerce Profitability & Inventory Optimisation
 
-Ce projet consiste à analyser les données commerciales de **BottleNeck**, un marchand de vins disposant de plusieurs systèmes d'information pour gérer ses produits, ses ventes et ses stocks.
+## Executive Summary
 
-L'entreprise utilise notamment :
+Analyse de la performance commerciale et financière d'un
+site e-commerce spécialisé dans la vente de vins et spiritueux.
 
-- un **ERP** contenant les références produits, les prix, les prix d'achat et les stocks ;
-- une base issue du **site e-commerce** contenant les ventes et les informations produits ;
-- une **table de liaison** permettant de faire correspondre les identifiants entre les deux systèmes.
+Cette étude de cas vise à accompagner la direction dans
+le pilotage du chiffre d'affaires, la maîtrise de la
+rentabilité, l'optimisation des stocks et la fiabilisation
+des données commerciales.
 
-L'objectif du projet est de consolider ces différentes sources, d'améliorer la qualité des données et de produire des analyses permettant d'aider le comité de direction dans le pilotage de l'activité.
+L'analyse repose sur la consolidation de trois sources
+de données : ERP, site e-commerce et table de liaison.
 
-Les ventes analysées correspondent au mois d'octobre.
+## Key Business Findings
 
----
+| Indicateur | Résultat |
+|---|---:|
+| Produits analysés | 713 |
+| Sources de données consolidées | 3 |
+| Chiffre d'affaires TTC calculé | 143 324,10 € |
+| Quantités vendues | 5 743 |
+| Valorisation du stock au coût d'achat | 277 328,07 € |
+| Quantités en stock | 16 740 |
+| Taux de marge moyen par produit | 61,01 % |
+| Prix atypiques identifiés | 31 |
+| Produits à marge négative | 1 |
+| Taux de marge minimum | -86,39 % |
+| Références stockées sans vente sur la période | 3 |
+| Valeur de ces stocks sans vente | 14 959,40 € |
 
-## 🎯 Objectifs
+Périmètre temporel :
+- Ventes du 1er au 31 octobre.
+- Situation des stocks au 31 octobre.
 
-Le projet comporte deux grandes phases.
+## Business Challenge
 
-### 1. Préparation et fiabilisation des données
+Bottleneck dispose de données commerciales réparties
+entre plusieurs systèmes d'information.
 
-- explorer les différentes sources de données ;
-- identifier les valeurs manquantes et les incohérences ;
-- vérifier l'unicité des identifiants ;
-- corriger ou supprimer les données erronées ;
-- nettoyer les données issues du site web ;
-- rapprocher les références ERP et Web grâce à la table de liaison ;
-- construire un dataset final propre et exploitable.
+L'absence d'identifiants communs et les incohérences
+présentes dans les fichiers limitent la fiabilité
+des analyses commerciales et financières.
 
-### 2. Analyse commerciale
+Les principaux enjeux sont :
 
-L'analyse permet notamment d'étudier :
+- Fiabiliser les données commerciales.
+- Mesurer la performance des ventes.
+- Identifier les anomalies de rentabilité.
+- Optimiser la gestion des stocks.
+- Analyser le positionnement tarifaire.
+- Accompagner les décisions d'approvisionnement.
 
-- le chiffre d'affaires total ;
-- le chiffre d'affaires par produit ;
-- les références générant le plus de chiffre d'affaires ;
-- les produits les plus vendus ;
-- la concentration des ventes avec une analyse de type Pareto ;
-- la distribution des prix ;
-- les valeurs atypiques ;
-- la rotation et la valorisation des stocks ;
-- les taux de marge ;
-- les relations entre prix, ventes et stocks.
-
----
-
-## 🗂️ Sources de données
-
-Trois sources principales ont été utilisées :
-
-### ERP
-
-Le fichier ERP contient notamment :
-
-- `product_id` : identifiant produit ERP ;
-- `price` : prix de vente ;
-- `purchase_price` : prix d'achat ;
-- `stock_quantity` : quantité en stock ;
-- `stock_status` : statut du stock ;
-- `onsale_web` : présence ou non du produit sur le site.
-
-### Site Web
-
-L'extraction du site contient notamment :
-
-- `sku` : identifiant produit côté web ;
-- `total_sales` : quantité vendue ;
-- `post_title` : nom du produit ;
-- `post_type` : type de contenu.
-
-### Table de liaison
-
-La table de liaison permet de rapprocher :
-
-- `product_id` côté ERP ;
-- `id_web` côté site web.
-
-Cette table est nécessaire car les deux systèmes n'utilisent pas les mêmes identifiants produits.
-
----
-
-## 🧹 Nettoyage et préparation des données
-
-Une analyse exploratoire a été réalisée sur chaque source avant leur fusion.
-
-Plusieurs problèmes de qualité ont été identifiés.
+## Data Sources
 
 ### ERP
 
-Les contrôles ont notamment porté sur :
+825 observations initiales contenant les informations
+relatives aux produits, aux prix d'achat, aux prix
+de vente et aux quantités en stock.
 
-- les types des variables ;
-- les valeurs manquantes ;
-- l'unicité des identifiants ;
-- les prix ;
-- les quantités en stock ;
-- la cohérence entre `stock_quantity` et `stock_status`.
+### E-commerce
 
-Plusieurs anomalies ont été détectées, notamment :
+1 513 observations initiales contenant les données
+de ventes et les informations produits.
 
-- des prix négatifs ;
-- des quantités de stock négatives ;
-- des incohérences entre la quantité disponible et le statut du stock.
+### Mapping Table
 
-Lorsque la valeur correcte pouvait être déterminée grâce à une règle métier fiable, elle a été corrigée.
+825 observations permettant de rapprocher les
+identifiants ERP et e-commerce.
 
-Dans le cas contraire, les observations incohérentes ont été supprimées afin de ne pas introduire de valeurs arbitraires dans l'analyse.
+## Analytical Approach
 
-### Données Web
+### 1. Data Quality & Preparation
 
-L'extraction du site contenait également des données qui ne correspondaient pas directement à des produits.
+- Analyse exploratoire des trois sources.
+- Contrôle des valeurs manquantes.
+- Vérification de l'unicité des identifiants.
+- Identification des doublons techniques.
+- Suppression des lignes non exploitables.
+- Traitement des prix et stocks négatifs.
+- Correction des incohérences de statut de stock.
 
-Les traitements ont notamment consisté à :
+### 2. Data Integration
 
-- sélectionner uniquement les colonnes nécessaires ;
-- identifier les lignes sans SKU ;
-- supprimer les lignes inutilisables ;
-- filtrer `post_type = product` ;
-- éliminer les lignes correspondant à des `attachments`.
+- Jointure externe gauche entre l'ERP et la table
+  de liaison.
+- Jointure interne avec les données e-commerce.
+- Contrôle des correspondances entre les systèmes.
+- Construction d'un dataset final de 713 produits.
 
-### Table de liaison
+### 3. Business KPI Development
 
-Des contrôles ont également été réalisés sur :
+Création des indicateurs suivants :
 
-- l'unicité de `product_id` ;
-- l'unicité de `id_web` ;
-- les valeurs manquantes ;
-- les références ne possédant pas de correspondance entre les systèmes.
+- Chiffre d'affaires par produit.
+- Quantités vendues.
+- Prix de vente hors taxes.
+- Taux de marge commerciale.
+- Valorisation des stocks au prix d'achat.
+- Couverture de stock estimée en mois.
 
----
+### 4. Statistical Analysis
 
-## 🔗 Fusion des données
+- Analyse descriptive des prix.
+- Détection des valeurs atypiques avec Z-score et IQR.
+- Analyse de la concentration du chiffre d'affaires.
+- Analyse des ventes et des stocks.
+- Analyse des marges commerciales.
+- Matrice de corrélation.
 
-La consolidation a été réalisée en deux étapes.
+## Business Findings
 
-### Étape 1
+### Commercial Performance
 
-Fusion entre l'ERP et la table de liaison grâce à :
+Le chiffre d'affaires TTC calculé atteint 143 324,10 €
+pour 5 743 unités vendues sur la période étudiée.
 
-`product_id`
+L'analyse des produits les plus contributifs permet
+d'identifier les références à surveiller en priorité
+dans le cadre de la stratégie commerciale.
 
-### Étape 2
+### Financial Performance
 
-Fusion avec les données du site web grâce à la correspondance :
+Le taux de marge moyen par produit atteint 61,01 %.
 
-`id_web ↔ sku`
+Une référence présente cependant une anomalie majeure :
 
-Après nettoyage et consolidation, le dataset final contient **713 produits exploitables**.
+- Prix de vente TTC : 12,65 €
+- Prix d'achat : 77,48 €
+- Prix de vente HT : environ 10,54 €
+- Taux de marge : -86,39 %
+- Perte brute théorique par unité : 66,94 €
 
----
+Cette situation justifie une vérification prioritaire
+des données tarifaires et des conditions d'achat.
 
-## 🛠️ Création de nouveaux indicateurs
+### Inventory Management
 
-Plusieurs variables métier ont été créées à partir des données existantes.
+La valorisation totale des stocks au coût d'achat
+atteint 277 328,07 €, pour 16 740 unités.
 
-### Chiffre d'affaires par produit
+Une analyse complémentaire du dataset final identifie
+trois références disposant de stock mais n'ayant
+enregistré aucune vente pendant le mois étudié.
 
-`CA = prix × quantité vendue`
+Ces références représentent une valeur de stock
+de 14 959,40 €.
 
-Cet indicateur permet de mesurer la contribution de chaque référence au chiffre d'affaires.
+Ce constat constitue une piste d'investigation pour
+optimiser les approvisionnements et le besoin
+en fonds de roulement.
 
-### Prix hors taxes
+### Pricing Strategy
 
-Le prix HT a été calculé à partir du prix TTC afin de pouvoir analyser correctement la marge.
+L'analyse statistique des prix révèle :
 
-### Taux de marge
+- Prix moyen : 32,32 €
+- Prix médian : 23,40 €
+- Prix maximum : 225 €
+- 31 prix atypiques identifiés dans la soutenance.
 
-`Taux de marge = (Prix HT - Prix d'achat) / Prix d'achat`
+Les prix atypiques correspondent notamment à des
+produits premium.
 
-Cet indicateur permet d'évaluer la rentabilité des différentes références.
+Un prix statistiquement atypique ne constitue donc
+pas nécessairement une erreur de tarification.
 
-### Rotation / couverture du stock
+### Correlation Analysis
 
-La quantité disponible a été comparée aux ventes du mois afin d'identifier les références présentant un niveau de stock important par rapport à leur rythme de vente.
+| Variables | Corrélation |
+|---|---:|
+| Stock / Ventes | +0,44 |
+| Prix / Ventes | -0,52 |
+| Prix / Stock | -0,11 |
 
-### Valorisation du stock
+Les résultats mettent en évidence une association
+négative entre le prix et les volumes vendus.
 
-`Valorisation du stock = Prix d'achat × Quantité en stock`
+Ils constituent des pistes d'analyse commerciale,
+sans permettre d'établir une relation causale.
 
-Cet indicateur permet d'estimer le capital immobilisé dans les stocks.
+## Strategic Recommendations
 
----
+1. Vérifier immédiatement les références présentant
+   une marge négative.
 
-## 📊 Analyse de la distribution des prix
+2. Analyser les produits sans vente et les références
+   présentant une couverture de stock élevée.
 
-L'étude de la distribution montre notamment :
+3. Adapter les approvisionnements aux performances
+   commerciales et aux historiques de demande.
 
-- un prix moyen d'environ **32 €** ;
-- un prix médian d'environ **23 €** ;
-- 50 % des références situées approximativement entre **14 € et 42 €** ;
-- quelques références beaucoup plus coûteuses que le reste du catalogue.
+4. Identifier les références combinant contribution
+   au chiffre d'affaires et rentabilité élevée.
 
-La moyenne supérieure à la médiane indique une distribution asymétrique vers les prix élevés.
+5. Approfondir l'analyse des performances par
+   segment tarifaire.
 
-Ces références premium nécessitent donc une analyse spécifique avant de les considérer comme des erreurs.
+6. Standardiser les identifiants produits entre
+   l'ERP et le site e-commerce.
 
----
+7. Automatiser les contrôles de qualité portant
+   sur les prix, les stocks et les marges.
 
-## 🔎 Détection des valeurs atypiques
+8. Mettre en place un reporting mensuel de suivi
+   de la performance commerciale et financière.
 
-Deux méthodes statistiques ont été utilisées afin d'identifier les prix atypiques.
+## Business Value
 
-### Z-score
+Cette analyse fournit à la direction une base
+décisionnelle permettant de :
 
-Le Z-score mesure l'éloignement d'une observation par rapport à la moyenne en nombre d'écarts-types.
+- Identifier les risques de perte de marge.
+- Orienter les décisions d'approvisionnement.
+- Prioriser les investigations sur les stocks.
+- Mieux comprendre la performance commerciale.
+- Fiabiliser les données utilisées pour le reporting.
+- Accompagner les décisions tarifaires.
 
-`Z = (x - moyenne) / écart-type`
+Les bénéfices présentés correspondent à des usages
+potentiels et non à des économies effectivement
+mesurées après déploiement.
 
-Les valeurs présentant un Z-score supérieur à 3 ont été étudiées comme valeurs potentiellement atypiques.
+## Analytical Limitations
 
-### Intervalle interquartile (IQR)
+- L'analyse porte sur un seul mois de ventes.
+- L'absence de vente ne signifie pas nécessairement
+  qu'un produit constitue un stock dormant.
+- Le taux de marge moyen est une moyenne par référence,
+  et non un taux de marge global pondéré par les ventes.
+- La couverture de stock doit être traitée séparément
+  pour les produits sans vente.
+- Les corrélations ne démontrent pas de causalité.
+- Le calcul du chiffre d'affaires repose sur les prix
+  disponibles et les quantités vendues.
 
-L'IQR mesure la dispersion des 50 % centraux de la distribution.
+## Technical Stack
 
-`IQR = Q3 - Q1`
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
+- Plotly
+- Jupyter Notebook
+- Data Cleaning
+- Statistical Analysis
+- Financial Analytics
+- Inventory Analytics
 
-Les valeurs situées au-delà de :
+## Project Context
 
-`Q3 + 1,5 × IQR`
+Étude de cas professionnalisante réalisée dans le cadre
+du projet 6 de la certification Data Analyst OpenClassrooms.
 
-ont été considérées comme des valeurs atypiques potentielles.
+## Author
 
-Cette méthode identifie **31 références**, soit environ **4,35 % du catalogue**.
+Ines Belhoussine
 
-### Interprétation
-
-L'analyse métier montre que ces valeurs ne correspondent pas nécessairement à des erreurs de saisie.
-
-Il s'agit principalement de références haut de gamme :
-
-- champagnes ;
-- grands crus ;
-- cognacs premium ;
-- vins rares.
-
-Leurs prix d'achat sont également élevés, ce qui confirme la cohérence de leurs prix de vente.
-
-Les valeurs statistiquement atypiques ne doivent donc pas être automatiquement supprimées : elles doivent d'abord être interprétées dans leur contexte métier.
-
----
-
-## 💰 Analyse du chiffre d'affaires
-
-Le chiffre d'affaires est calculé pour chaque référence avec :
-
-`CA produit = prix × quantité vendue`
-
-Le chiffre d'affaires total du site sur la période étudiée est d'environ :
-
-### **143 324 €**
-
-Un classement des références par chiffre d'affaires permet ensuite d'identifier les produits contribuant le plus à l'activité.
-
----
-
-## 🏆 Analyse des meilleures références
-
-Deux classements complémentaires ont été réalisés :
-
-### Classement par chiffre d'affaires
-
-Il permet d'identifier les produits générant le plus de valeur.
-
-### Classement par quantité vendue
-
-Il permet d'identifier les produits générant le plus de volume.
-
-Cette distinction est importante car un produit très vendu n'est pas nécessairement celui qui génère le plus de chiffre d'affaires.
-
----
-
-## 📈 Analyse de Pareto
-
-Une analyse cumulative des ventes a été réalisée afin d'étudier la concentration du chiffre d'affaires et des volumes.
-
-Pour chaque produit, la part du chiffre d'affaires a été calculée :
-
-`Part du CA = CA produit / CA total`
-
-Une somme cumulative permet ensuite d'identifier les références représentant environ 80 % du chiffre d'affaires.
-
-La même approche a été appliquée aux quantités vendues.
-
-Cette analyse permet d'identifier les références stratégiques du catalogue.
-
----
-
-## 📦 Analyse des stocks
-
-L'analyse des stocks permet d'identifier :
-
-- les références disposant d'un stock important ;
-- les produits présentant une faible rotation ;
-- les risques de surstock ;
-- le capital immobilisé.
-
-Une attention particulière doit être portée aux produits combinant :
-
-- un stock élevé ;
-- des ventes faibles ;
-- une valeur d'achat importante.
-
-Ces références peuvent représenter un coût important pour l'entreprise.
-
----
-
-## 📉 Analyse des marges
-
-Le prix hors taxes et le prix d'achat ont été utilisés pour calculer le taux de marge des produits.
-
-L'analyse montre une **rentabilité globalement positive**, avec un taux de marge moyen proche de **60 %**.
-
-Les éventuelles marges négatives doivent faire l'objet d'une vérification spécifique afin de déterminer s'il s'agit :
-
-- d'une erreur de prix ;
-- d'une promotion ;
-- d'une stratégie de déstockage ;
-- ou d'une anomalie dans les données.
-
----
-
-## 🔗 Analyse des corrélations
-
-Une matrice de corrélation a été réalisée entre :
-
-- le prix ;
-- les quantités vendues ;
-- le stock disponible.
-
-Les principaux résultats sont :
-
-- **stock / ventes : 0,44**
-- **prix / ventes : -0,52**
-- **prix / stock : -0,11**
-
-### Interprétation
-
-La relation négative entre prix et ventes indique que les produits les plus chers ont tendance à être vendus en plus petites quantités.
-
-La relation positive entre stock et ventes suggère que les références les plus demandées disposent généralement de niveaux de stock plus importants.
-
-Enfin, la relation très faible entre prix et stock indique que le niveau de stock ne semble pas directement déterminé par le prix du produit.
-
-> Une corrélation indique une relation statistique entre deux variables, mais ne permet pas à elle seule de démontrer un lien de causalité.
-
----
-
-## 💡 Recommandations
-
-L'analyse met en évidence plusieurs pistes d'amélioration.
-
-### Qualité des données
-
-- renforcer les contrôles lors de la saisie ;
-- empêcher les prix négatifs ;
-- empêcher les stocks négatifs ;
-- automatiser la cohérence entre quantité et statut de stock ;
-- fiabiliser la table de correspondance entre ERP et site web ;
-- mettre en place des contrôles réguliers sur les identifiants produits.
-
-### Gestion commerciale
-
-- suivre régulièrement les références générant le plus de chiffre d'affaires ;
-- surveiller les produits à faible rotation ;
-- limiter le surstock ;
-- analyser les produits à marge faible ou négative ;
-- suivre séparément les références premium.
-
-### Data visualisation
-
-Le dataset consolidé constitue une base exploitable pour la création future d'un tableau de bord permettant de suivre automatiquement :
-
-- chiffre d'affaires ;
-- ventes ;
-- stocks ;
-- marges ;
-- rotation des produits ;
-- anomalies de données.
-
----
-
-## 🔐 RGPD
-
-Les données utilisées dans ce projet concernent uniquement :
-
-- des produits ;
-- des ventes ;
-- des prix ;
-- des stocks.
-
-Aucune donnée personnelle ou sensible n'est utilisée dans le périmètre analysé.
-
----
-
-## 🧰 Technologies utilisées
-
-- **Python**
-- **Pandas**
-- **NumPy**
-- **Matplotlib**
-- **Seaborn**
-- **Plotly**
-- **Jupyter Notebook**
-- **Excel**
-
----
-
+Business Data Analyst | Business Intelligence
+& Strategic Decision Support
